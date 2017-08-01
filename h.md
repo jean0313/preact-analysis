@@ -60,7 +60,7 @@ export function h(nodeName, attributes) {
           children = [child];   //首次赋值
         }
         else {
-          children.push(child);  //其他情况则将结果push到chidren内
+          children.push(child);  //其他情况则将结果push到children内
         }
 
         lastSimple = simple;
