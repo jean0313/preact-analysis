@@ -1,4 +1,5 @@
-options对象用来保存全局的选项
+**options**对象用来保存全局的选项
+
 ```javascript
 /** Global options
  *	@public

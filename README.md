@@ -26,3 +26,8 @@ render.js
 util.js
 vnode.js
 ```
+
+## Contributors
+
+- [g1eny0ung](https://github.com/g1eny0ung)
+- [PerkinJ](https://github.com/PerkinJ)
