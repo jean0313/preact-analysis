@@ -11,7 +11,7 @@ export default {
 	 *	@type Boolean
 	 *	@default true
 	 */
-	//syncComponentUpdates: true,   //同步组建更新
+	//syncComponentUpdates: true,   //同步组件更新
 
 	/** Processes all created VNodes.
 	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
@@ -25,7 +25,7 @@ export default {
 	// afterUpdate(component) { }  //组件最新一次render更新dom后触发的钩子函数
 
 	/** Hook invoked immediately before a component is unmounted. */
-	// beforeUnmount(component) { }   	//组建卸载之前的钩子函数
+	// beforeUnmount(component) { }   	//组件卸载之前的钩子函数
 };
 
 ```

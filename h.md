@@ -40,7 +40,7 @@ export function h(nodeName, attributes) {
     *／
     while (stack.length) {
       if ((child = stack.pop()) && child.pop!==undefined) {
-         //这里考虑的是如果child为数组的情况，则以此推入stack.注意：每次循环都会进行child = stack.pop()操作
+         //这里考虑的是如果child为数组的情况，则依次推入stack.注意：每次循环都会进行child = stack.pop()操作
         for (i=child.length; i--; ) stack.push(child[i]);
       }
       else {
@@ -53,7 +53,7 @@ export function h(nodeName, attributes) {
         }
 
         if (simple && lastSimple) {
-          //如果本次跟上一次循环都是非简单匹配，则将字符串拼接
+          //如果本次跟上一次循环都是简单匹配，则将字符串拼接
           children[children.length-1] += child;
         }
         else if (children===EMPTY_CHILDREN) {
