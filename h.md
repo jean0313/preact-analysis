@@ -62,7 +62,6 @@ export function h(nodeName, attributes) {
        else {
          children.push(child);  //其他情况则将结果push到chidren内
        }
-
        lastSimple = simple;
      }
    }
