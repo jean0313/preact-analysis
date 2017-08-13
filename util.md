@@ -3,7 +3,7 @@
 
 ```javascript
 /** Copy own-properties from `props` onto `obj`.
- *  把props的属性添加到obj上
+ *  把props的属性添加到obj上,浅拷贝,类似于ES6的Object.assign
  *	@returns obj
  *	@private
  */
