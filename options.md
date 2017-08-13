@@ -17,7 +17,7 @@ export default {
 	/** Processes all created VNodes.
 	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
 	 */
-	//vnode(vnode) { }  	//处理所有已经创建的VNodes
+	//vnode(vnode) { }  	//扩展VNode实例
 
 	/** Hook invoked after a component is mounted. */
 	// afterMount(component) { }   //组件挂载完之后触发此钩子函数
