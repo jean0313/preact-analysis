@@ -17,6 +17,7 @@ export function enqueueRender(component) {
     }
 }
 
+// 重新render组件
 export function rerender() {
     let p, list = items;
     items = [];

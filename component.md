@@ -1,3 +1,4 @@
+基本组件
 
 ```javascript
 import { FORCE_RENDER } from './constants';
@@ -57,7 +58,7 @@ extend(Component.prototype, {
         if (!this.prevState) this.prevState = extend({}, s);
         extend(s, typeof state==='function' ? state(s, this.props) : state);
         if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
-        enqueueRender(this);
+        enqueueRender(this); // 将组件放入渲染队列中
     },
 
 
