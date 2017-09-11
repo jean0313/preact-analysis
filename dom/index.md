@@ -1,4 +1,5 @@
 创建dom
+
 ```javascript
 import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
@@ -9,8 +10,8 @@ import options from '../options';
  *  @param {Boolean} [isSvg=false]  If `true`, creates an element within the SVG namespace.
  *  @returns {Element} node
  */
- // 这里我们需要注意区分普通元素与 SVG 元素
 export function createNode(nodeName, isSvg) {
+    // 这里我们需要注意区分普通元素与 SVG 元素
     let node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
     node.normalizedNodeName = nodeName;
     return node;
@@ -20,7 +21,7 @@ export function createNode(nodeName, isSvg) {
 /** Remove a child node from its parent if attached.
  *  @param {Element} node       The node to remove
  */
- //去掉已经附加在父节点上的节点
+// 移除指定的节点
 export function removeNode(node) {
     let parentNode = node.parentNode;
     if (parentNode) parentNode.removeChild(node);
@@ -36,7 +37,7 @@ export function removeNode(node) {
  *  @param {Boolean} isSvg  Are we currently diffing inside an svg?
  *  @private
  */
- //设置存取器，对node中的属性一一处理
+ // 设置存取器，对node中的属性一一处理
 export function setAccessor(node, name, old, value, isSvg) {
     if (name==='className') name = 'class';
 
@@ -52,7 +53,7 @@ export function setAccessor(node, name, old, value, isSvg) {
         node.className = value || '';
     }
     else if (name==='style') {
-        //对style属性进行处理
+        // 对style属性进行处理
         if (!value || typeof value==='string' || typeof old==='string') {
             node.style.cssText = value || '';
         }
@@ -61,7 +62,7 @@ export function setAccessor(node, name, old, value, isSvg) {
                 for (let i in old) if (!(i in value)) node.style[i] = '';
             }
             for (let i in value) {
-                //一些数值的换算
+                // 一些数值的换算
                 node.style[i] = typeof value[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (value[i]+'px') : value[i];
             }
         }
@@ -105,6 +106,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 /** Attempt to set a DOM property to the given value.
  *  IE & FF throw for certain property-value combinations.
  */
+// 在节点上设置属性
 function setProperty(node, name, value) {
     try {
         node[name] = value;
@@ -115,7 +117,7 @@ function setProperty(node, name, value) {
 /** Proxy an event to hooked event handlers
  *  @private
  */
- //设置事件代理
+// 设置事件代理
 function eventProxy(e) {
     return this._listeners[e.type](options.event && options.event(e) || e);
 }

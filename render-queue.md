@@ -1,5 +1,6 @@
-处理render的队列
-```
+**render-queue**处理render的队列
+
+```javascript
 import options from './options';
 import { defer } from './util';
 import { renderComponent } from './vdom/component';

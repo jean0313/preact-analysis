@@ -1,5 +1,5 @@
 
-```
+```javascript
 import { FORCE_RENDER } from './constants';
 import { extend } from './util';
 import { renderComponent } from './vdom/component';
