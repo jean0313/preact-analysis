@@ -56,7 +56,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
 
 	// diffLevel being reduced to 0 means we're exiting the diff
-	// 推出diff
+	// 退出diff
 	if (!--diffLevel) {
 		hydrating = false;
 		// invoke queued componentDidMount lifecycle methods
@@ -68,6 +68,11 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 
 
 /** Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing. */
+/**
+ * 1. 首先判断vnode是否为空值，如果是将vnode设定为空字符串
+ * 2. 再次判断vnode是否为字符串或者数字，内部会判断是否为文本节点，最后进行更新或者替换工作
+ * 3. 如果vnode.nodeName是一个component则进行组件的渲染
+ */
 function idiff(dom, vnode, context, mountAll, componentRoot) {
 	let out = dom,
 		prevSvgMode = isSvgMode;
@@ -80,6 +85,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	if (typeof vnode==='string' || typeof vnode==='number') {
 
 		// update if it's already a Text node:
+		// 如果dom是文本节点
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			/* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
 			if (dom.nodeValue!=vnode) {
@@ -95,7 +101,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 			}
 		}
 
-		out[ATTR_KEY] = true;
+		out[ATTR_KEY] = true; // 暂时看应该是标明dom为preact使用的dom？
 
 		return out;
 	}
