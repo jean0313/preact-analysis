@@ -8,7 +8,7 @@ import options from '../options';
 import { removeNode } from '../dom';
 
 /** Queue of components that have been mounted and are awaiting componentDidMount */
-// 已经mount的组件队列，等待componentDidMount
+// 已经mount的组件队列，收集等待被调用componentDidMount回调的组件
 export const mounts = [];
 
 /** Diff recursion count, used to track the end of the diff cycle. */
@@ -16,13 +16,15 @@ export const mounts = [];
 export let diffLevel = 0;
 
 /** Global flag indicating if the diff is currently within an SVG */
+// 判断当前的DOM树是否为SVG
 let isSvgMode = false;
 
 /** Global flag indicating if the diff is performing hydration */
+// 判断当前元素是否缓存了之前的虚拟dom
 let hydrating = false;
 
 /** Invoke queued componentDidMount lifecycle methods */
-// 触发componentDidMount
+// 触发componentDidMount与afterMount
 export function flushMounts() {
 	let c;
 	while ((c=mounts.pop())) {
@@ -43,12 +45,14 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// 初始入口的操作
 	if (!diffLevel++) {
 		// when first starting the diff, check if we're diffing an SVG or within an SVG
+		// 当刚开始进入diff时，检查dom树的类型是否为SVG
 		isSvgMode = parent!=null && parent.ownerSVGElement!==undefined;
 
 		// hydration is indicated by the existing element to be diffed not having a prop cache
+		// 检查是否缓存了数据
 		hydrating = dom!=null && !(ATTR_KEY in dom);
 	}
-
+	// 返回新的dom
 	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
 
 	// append the element if its a new parent
@@ -60,6 +64,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	if (!--diffLevel) {
 		hydrating = false;
 		// invoke queued componentDidMount lifecycle methods
+		// 执行所有hook方法
 		if (!componentRoot) flushMounts();
 	}
 
@@ -78,10 +83,12 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		prevSvgMode = isSvgMode;
 
 	// empty values (null, undefined, booleans) render as empty Text nodes
+	// 将null, undefined, boolean转换为空字符
 	if (vnode==null || typeof vnode==='boolean') vnode = '';
 
 
 	// Fast case: Strings & Numbers create/update Text nodes.
+	// 将字符串和数字转化为文本节点
 	if (typeof vnode==='string' || typeof vnode==='number') {
 
 		// update if it's already a Text node:
@@ -94,6 +101,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		}
 		else {
 			// it wasn't a Text node: replace it with one and recycle the old Element
+			// 如果不是文本节点，则创建新的虚拟dom
 			out = document.createTextNode(vnode);
 			if (dom) {
 				if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
@@ -108,6 +116,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// If the VNode represents a Component, perform a component diff:
+	// 如果vnodeName 是一个组件，则buildComponentFromVNode
 	let vnodeName = vnode.nodeName;
 	if (typeof vnodeName==='function') {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
@@ -115,21 +124,25 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
+	// 更新isSvgMode flag
 	isSvgMode = vnodeName==='svg' ? true : vnodeName==='foreignObject' ? false : isSvgMode;
 
 
 	// If there's no existing element or it's the wrong type, create a new one:
+	// 如果dom不存在或者是错误的类型，则创建新的
 	vnodeName = String(vnodeName);
 	if (!dom || !isNamedNode(dom, vnodeName)) {
 		out = createNode(vnodeName, isSvgMode);
 
 		if (dom) {
 			// move children into the replacement node
+			// 将真实的dom，转移到虚拟dom中
 			while (dom.firstChild) out.appendChild(dom.firstChild);
 
 			// if the previous Element was mounted into the DOM, replace it inline
+			// 如果父元素存在，则插入到父节点
 			if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
-
+		
 			// recycle the old element (skips non-Element node types)
 			recollectNodeTree(dom, true);
 		}
