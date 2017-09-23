@@ -345,6 +345,7 @@ function diffAttributes(dom, attrs, old) {
 	let name;
 
 	// remove attributes no longer present on the vnode by setting them to undefined
+	// 移除属性因为现在的name为空了
 	for (name in old) {
 		if (!(attrs && attrs[name]!=null) && old[name]!=null) {
 			setAccessor(dom, name, old[name], old[name] = undefined, isSvgMode);
@@ -352,6 +353,7 @@ function diffAttributes(dom, attrs, old) {
 	}
 
 	// add new & update changed attributes
+	// 添加或更新改变的属性
 	for (name in attrs) {
 		if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
 			setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
