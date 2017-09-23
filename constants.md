@@ -1,4 +1,5 @@
 指定不同的渲染模式
+
 ```javascript
 // render modes
 

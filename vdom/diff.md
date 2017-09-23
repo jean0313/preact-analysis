@@ -105,6 +105,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 			out = document.createTextNode(vnode);
 			if (dom) {
 				if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
+				// 回收旧的dom
 				recollectNodeTree(dom, true);
 			}
 		}
@@ -129,7 +130,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// If there's no existing element or it's the wrong type, create a new one:
-	// 如果dom不存在或者是错误的类型，则创建新的
+	// 如果dom不存在或者不是相同的节点，则创建新的
 	vnodeName = String(vnodeName);
 	if (!dom || !isNamedNode(dom, vnodeName)) {
 		out = createNode(vnodeName, isSvgMode);
@@ -144,6 +145,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 			if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 		
 			// recycle the old element (skips non-Element node types)
+			// 回收旧的dom
 			recollectNodeTree(dom, true);
 		}
 	}
@@ -159,12 +161,14 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 	// Optimization: fast-path for elements containing a single TextNode:
+	// 当只有一个文本节点时则直接替换
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
 		if (fc.nodeValue!=vchildren[0]) {
 			fc.nodeValue = vchildren[0];
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
+	// 进行diff
 	else if (vchildren && vchildren.length || fc!=null) {
 		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
 	}
@@ -182,6 +186,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM.
+ *  内部diff，比较子节点和属性的变化
  *	@param {Element} dom			Element whose children should be compared & mutated
  *	@param {Array} vchildren		Array of VNodes to compare to `dom.childNodes`
  *	@param {Object} context			Implicitly descendant context object (from most recent `getChildContext()`)
@@ -200,15 +205,19 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		j, c, f, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
+	// 所有具有key值的child进入keyed，没有key值进入children
+	// 此处检查的不是虚拟DOM
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
 				props = child[ATTR_KEY],
+				// 查找key，_component指定了就用_component.__key。没有就用props.key
 				key = vlen && props ? child._component ? child._component.__key : props.key : null;
 			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
 			}
+			// 此处比较绕弯，先判断是否有属性存在，没有在判断是否为Text，是的话看它先前是否是存在的，最后的 : isHydrating 就是不存在的情况
 			else if (props || (child.splitText!==undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
 				children[childrenLen++] = child;
 			}
@@ -221,15 +230,18 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			child = null;
 
 			// attempt to find a node based on key matching
+			// 匹配已经在keyed里面先前的node
 			let key = vchild.key;
 			if (key!=null) {
 				if (keyedLen && keyed[key]!==undefined) {
 					child = keyed[key];
+					// 清除掉keyed里面的匹配到的value
 					keyed[key] = undefined;
 					keyedLen--;
 				}
 			}
 			// attempt to pluck a node of the same type from the existing children
+			// 匹配相同type的先前存在的child
 			else if (!child && min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
@@ -243,17 +255,22 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
+			// 拿出匹配到的child再次进行diff算法比较，一层一层往深层diff
 			child = idiff(child, vchild, context, mountAll);
 
 			f = originalChildren[i];
+			// child存在并且child不等于之前dom并且child不等于本次循环内的先前原始子节点
 			if (child && child!==dom && child!==f) {
 				if (f==null) {
+					// 子节点为空，直接append
 					dom.appendChild(child);
 				}
 				else if (child===f.nextSibling) {
+					// 表明child是新的dom，那么删除旧的节点
 					removeNode(f);
 				}
 				else {
+					// 其他情况添加到前面
 					dom.insertBefore(child, f);
 				}
 			}
@@ -261,6 +278,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	}
 
 
+	// 进行回收
 	// remove unused keyed children:
 	if (keyedLen) {
 		for (let i in keyed) if (keyed[i]!==undefined) recollectNodeTree(keyed[i], false);
@@ -278,6 +296,10 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
  *	@param {Node} node						DOM node to start unmount/removal from
  *	@param {Boolean} [unmountOnly=false]	If `true`, only triggers unmount lifecycle, skips removal
  */
+ /**
+  * 重新回收♻️整个节点树
+	* unmountOnly表明只触发unmount生命周期，不进行节点的移除
+	*/
 export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;
 	if (component) {
@@ -287,6 +309,7 @@ export function recollectNodeTree(node, unmountOnly) {
 	else {
 		// If the node's VNode had a ref function, invoke it with null here.
 		// (this is part of the React spec, and smart for unsetting references)
+		// 如果存在ref，则设置为null
 		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
