@@ -60,7 +60,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 
 /** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
- *  渲染组建，出发必要的生命周期方法
+ *  渲染组建，触发必要的生命周期方法
  *	@param {Component} component
  *	@param {Object} [opts]
  *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
@@ -83,10 +83,12 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		rendered, inst, cbase;
 
 	// if updating
+  // 如果触发了更新
 	if (isUpdate) {
 		component.props = previousProps;
 		component.state = previousState;
 		component.context = previousContext;
+    // 判断是否需要跳过更新
 		if (opts!==FORCE_RENDER
 			&& component.shouldComponentUpdate
 			&& component.shouldComponentUpdate(props, state, context) === false) {
@@ -146,6 +148,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
+        // 开始diff阶段
 				base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, true);
 			}
 		}
@@ -153,6 +156,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
+        // 进行替换
 				baseParent.replaceChild(base, initialBase);
 
 				if (!toUnmount) {
