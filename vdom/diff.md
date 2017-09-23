@@ -205,16 +205,19 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		j, c, f, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
-	// 所有具有key值的child进入keyed，没有child
+	// 所有具有key值的child进入keyed，没有key值进入children
+	// 此处检查的不是虚拟DOM
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
 				props = child[ATTR_KEY],
+				// 查找key，_component指定了就用_component.__key。没有就用props.key
 				key = vlen && props ? child._component ? child._component.__key : props.key : null;
 			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
 			}
+			// 此处比较绕弯，先判断是否有属性存在，没有在判断是否为Text，是的话看它先前是否是存在的，最后的 : isHydrating 就是不存在的情况
 			else if (props || (child.splitText!==undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
 				children[childrenLen++] = child;
 			}
@@ -227,15 +230,18 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			child = null;
 
 			// attempt to find a node based on key matching
+			// 匹配已经在keyed里面先前的node
 			let key = vchild.key;
 			if (key!=null) {
 				if (keyedLen && keyed[key]!==undefined) {
 					child = keyed[key];
+					// 清除掉keyed里面的匹配到的value
 					keyed[key] = undefined;
 					keyedLen--;
 				}
 			}
 			// attempt to pluck a node of the same type from the existing children
+			// 匹配相同type的先前存在的child
 			else if (!child && min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
@@ -249,17 +255,22 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
+			// 拿出匹配到的child再次进行diff算法比较，一层一层往深层diff
 			child = idiff(child, vchild, context, mountAll);
 
 			f = originalChildren[i];
+			// child存在并且child不等于之前dom并且child不等于本次循环内的先前原始子节点
 			if (child && child!==dom && child!==f) {
 				if (f==null) {
+					// 子节点为空，直接append
 					dom.appendChild(child);
 				}
 				else if (child===f.nextSibling) {
+					// 表明child是新的dom，那么删除旧的节点
 					removeNode(f);
 				}
 				else {
+					// 其他情况添加到前面
 					dom.insertBefore(child, f);
 				}
 			}
@@ -267,6 +278,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	}
 
 
+	// 进行回收
 	// remove unused keyed children:
 	if (keyedLen) {
 		for (let i in keyed) if (keyed[i]!==undefined) recollectNodeTree(keyed[i], false);
