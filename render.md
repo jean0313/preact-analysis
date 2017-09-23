@@ -1,4 +1,4 @@
-**render**用来渲染JSX到指定element中
+**render**用来渲染JSX到指定element中，其实就是渲染成一个真实的dom
 
 ```javascript
 import { diff } from './vdom/diff';

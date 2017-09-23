@@ -1,4 +1,13 @@
 **h**函数接受了两个主要参数以及多个其他的参数作为子节点，返回一个虚拟DOM元素。
+相当于react中的react.createElement,来创建虚拟dom,也就是一个js的对象
+结构如下:
+```javascript
+{
+  nodeName:'div',
+  attributes:{'id':'preact'},
+  children:['preactChild']
+}
+```
 
 ```javascript
 import { VNode } from './vnode'; // 引入VNode
@@ -15,6 +24,7 @@ const EMPTY_CHILDREN = []; // 用来初始化children，在下方的h函数内�
  *	@public
  */
 export function h(nodeName, attributes) {
+   // 其实这里这要的操作就是把除了nodeName, attributes后面的child做成数组children,将nodeName,attributes以及children,key放到vnode中，返回一个虚拟对象
   let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
   for (i=arguments.length; i-- > 2; ) {
     stack.push(arguments[i]); // 先把除了nodeName和attributes之外所有的参数扔到stack里面
@@ -70,7 +80,7 @@ export function h(nodeName, attributes) {
      }
    }
 
-   let p = new VNode();
+   let p = new VNode();  // 请查看vnode.md文件
    p.nodeName = nodeName; // 虚拟DOM的节点名称
    p.children = children; // 虚拟DOM所有的孩子们
    p.attributes = attributes==null ? undefined : attributes; // 所有的属性

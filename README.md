@@ -27,6 +27,8 @@ util.js
 vnode.js
 ```
 
+## render process
+1. babel解析jsx
 ## Contributors
 
 - [g1eny0ung](https://github.com/g1eny0ung)
