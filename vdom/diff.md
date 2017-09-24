@@ -168,7 +168,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
-	// 进行diff
+	// 否则，如果存在chidren,则进行diff
 	else if (vchildren && vchildren.length || fc!=null) {
 		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
 	}
@@ -217,7 +217,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			// 此处比较绕弯，先判断是否有属性存在，没有在判断是否为Text，是的话看它先前是否是存在的，最后的 : isHydrating 就是不存在的情况
+			// 此处比较绕弯，先判断是否有属性存在，没有再判断是否为Text，是的话看它先前是否是存在的，最后的 : isHydrating 就是不存在的情况
 			else if (props || (child.splitText!==undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
 				children[childrenLen++] = child;
 			}
@@ -265,12 +265,13 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 					// 子节点为空，直接append
 					dom.appendChild(child);
 				}
+				// 此处为了提升性能，每次
 				else if (child===f.nextSibling) {
 					// 表明child是新的dom，那么删除旧的节点
 					removeNode(f);
 				}
 				else {
-					// 其他情况添加到前面
+					// insertBefore，将child插到f前面是为了提升性能,以便下一次判断兄弟节点进行删除操作。
 					dom.insertBefore(child, f);
 				}
 			}

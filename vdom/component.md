@@ -83,7 +83,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		rendered, inst, cbase;
 
 	// if updating
-  // 如果触发了更新
+  	// 如果触发了更新
 	if (isUpdate) {
 		component.props = previousProps;
 		component.state = previousState;
@@ -97,6 +97,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		else if (component.componentWillUpdate) {
 			component.componentWillUpdate(props, state, context);
 		}
+		// 
 		component.props = props;
 		component.state = state;
 		component.context = context;
@@ -106,9 +107,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 	component._dirty = false;
 
 	if (!skip) {
+		// 如果不跳过更新，则进行render
 		rendered = component.render(props, state, context);
 
 		// context to pass to the child, can be updated via (grand-)parent component
+		// 通过context传递全局状态
 		if (component.getChildContext) {
 			context = extend(extend({}, context), component.getChildContext());
 		}
@@ -252,14 +255,15 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 }
 
 
-
+// 从DOM中移除组件并
 /** Remove a component from the DOM and recycle it.
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
 export function unmountComponent(component) {
+	// 执行beforeUnmount的钩子函数
 	if (options.beforeUnmount) options.beforeUnmount(component);
-
+	// 
 	let base = component.base;
 
 	component._disable = true;
