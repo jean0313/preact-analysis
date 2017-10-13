@@ -49,32 +49,32 @@ export function h(nodeName, attributes) {
     * 以下部分主要对stack进行处理，对所有子节点进行遍历
     */
    while (stack.length) {
+     // 首先判断该元素是不是数组类型，这里通过是否含有函数pop去判别是否是个数组，如果子元素是数组，将其全部压入栈中
      if ((child = stack.pop()) && child.pop!==undefined) {
        // 这里考虑的是如果child为数组的情况，则依次推入stack。注意：每次循环都会进行child = stack.pop()操作
        for (i=child.length; i--; ) stack.push(child[i]);
      }
      else {
-       // 如果child是布尔类型，则将child置为null
+       // 因为子元素是不支持布尔类型的，如果child是布尔类型，则将child置为null
        if (typeof child==='boolean') child = null;
        /* 这里判断nodeName是否为function,并赋值给simple,若
-        * 不为function,则认为simple为true，我们不妨设为简单
-        * 匹配跟非简单匹配。
+        * 不为function,则认为simple为true，我们不妨设为简单类型和非简单类型。
         */
        if ((simple = typeof nodeName!=='function')) {
          if (child==null) child = '';
          else if (typeof child==='number') child = String(child); // 将数字转换为string
-         else if (typeof child!=='string') simple = false; // 如果child非字符串,simple则为false，即为非简单匹配
+         else if (typeof child!=='string') simple = false; // 如果child非字符串,simple则为false，即为非简单类型
        }
 
        if (simple && lastSimple) {
-         // 如果本次跟上一次循环都是简单匹配，则将字符串拼接
+         // 如果本次跟上一次循环都是简单类型，则将字符串拼接
          children[children.length-1] += child;
        }
        else if (children===EMPTY_CHILDREN) {
          children = [child]; // 首次赋值
        }
        else {
-         children.push(child); // 其他情况则将结果push到chidren内
+         children.push(child); //最后将处理的子节点传入数组children中，现在传入children中的节点有三种类型：纯字符串、代表dom节点的字符串以及代表组件的函数
        }
        lastSimple = simple;
      }
