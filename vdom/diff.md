@@ -210,7 +210,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	// 所有具有key值的child进入keyed，没有key值进入children
-	// 此处检查的不是虚拟DOM
+	// 创建一个包含key的子元素和一个不包含有子元素的Map
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
@@ -237,6 +237,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// 匹配已经在keyed里面先前的node
 			let key = vchild.key;
 			if (key!=null) {
+				// 通过键值匹配去寻找节点
 				if (keyedLen && keyed[key]!==undefined) {
 					child = keyed[key];
 					// 清除掉keyed里面的匹配到的value
@@ -245,7 +246,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 				}
 			}
 			// attempt to pluck a node of the same type from the existing children
-			// 匹配相同type的先前存在的child
+			// 从现有的孩子节点中匹配相同type的节点
 			else if (!child && min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
@@ -346,9 +347,9 @@ export function removeChildren(node) {
 
 
 /** Apply differences in attributes from a VNode to the given DOM Element.
- *	@param {Element} dom		Element with attributes to diff `attrs` against
- *	@param {Object} attrs		The desired end-state key-value attribute pairs
- *	@param {Object} old			Current/previous attributes (from previous VNode or element's prop cache)
+ *	@param {Element} dom		虚拟dom对应的真实dom
+ *	@param {Object} attrs		期望的最终键值属性对
+ *	@param {Object} old			当前或者之前的属性
  */
 function diffAttributes(dom, attrs, old) {
 	let name;
@@ -356,6 +357,7 @@ function diffAttributes(dom, attrs, old) {
 	// remove attributes no longer present on the vnode by setting them to undefined
 	// 移除属性因为现在的name为空了
 	for (name in old) {
+		// 如果old[name]存在，但是attrs[name]不存在
 		if (!(attrs && attrs[name]!=null) && old[name]!=null) {
 			setAccessor(dom, name, old[name], old[name] = undefined, isSvgMode);
 		}

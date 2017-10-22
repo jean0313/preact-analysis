@@ -43,9 +43,10 @@ export function setAccessor(node, name, old, value, isSvg) {
 
 
     if (name==='key') {
-        // ignore
+        // 如果是key属性，忽略
     }
     else if (name==='ref') {
+        // 如果是ref 函数被改变了，以null去执行之前的ref函数，并以node节点去执行新的ref函数
         if (old) old(null);
         if (value) value(node);
     }
@@ -59,6 +60,7 @@ export function setAccessor(node, name, old, value, isSvg) {
         }
         if (value && typeof value==='object') {
             if (typeof old!=='string') {
+                // 从dom的style中剔除已经被删除的属性
                 for (let i in old) if (!(i in value)) node.style[i] = '';
             }
             for (let i in value) {
@@ -73,7 +75,9 @@ export function setAccessor(node, name, old, value, isSvg) {
         if (value) node.innerHTML = value.__html || '';
     }
     // 事件处理
+    // 如果属性是以on开头，说明要绑定的是事件，因为Preact不同于React，并没有采用事件代理的机制，所有的事件都会被注册到真实的dom中。而且另一点与React不相同的是，如果你的事件名后添加Capture，例如onClickCapture，那么该事件将在dom的捕获阶段响应，默认会在冒泡事件响应。
     else if (name[0]=='o' && name[1]=='n') {
+        // 如果事件的名称是以Capture为结尾的，则去掉，并在捕获阶段节点监听事件
         let useCapture = name !== (name=name.replace(/Capture$/, ''));  //事件捕获boolean
         name = name.toLowerCase().substring(2);
         // 如果value有值，则进行事件监听，否则取消监听
