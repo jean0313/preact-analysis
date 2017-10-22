@@ -178,6 +178,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// Apply attributes/props from VNode to the DOM Element:
+	// 将props和atrributes从VNode中应用到DOM元素
 	diffAttributes(out, vnode.attributes, props);
 
 
@@ -302,12 +303,15 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
  */
  /**
   * 重新回收♻️整个节点树
-	* unmountOnly表明只触发unmount生命周期，不进行节点的移除
-	*/
+  * unmountOnly表明只触发unmount生命周期，不进行节点的移除
+  * 递归地回收节点及其后代节点
+  * unmountOnly如果为true,仅仅触发卸载的生命周期，跳过删除	
+*/
 export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;
 	if (component) {
 		// if node is owned by a Component, unmount that component (ends up recursing back here)
+		// 如果该节点属于某个组件，卸载该组件
 		unmountComponent(component);
 	}
 	else {
@@ -315,7 +319,7 @@ export function recollectNodeTree(node, unmountOnly) {
 		// (this is part of the React spec, and smart for unsetting references)
 		// 如果存在ref，则设置为null
 		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
-
+		// 如果unmountOnly为false或者dom中的ATTR_KEY属性不存在(表明不是由preact渲染的),则直接删除dom
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
 			removeNode(node);
 		}
@@ -329,7 +333,8 @@ export function recollectNodeTree(node, unmountOnly) {
  *	- we use .lastChild here because it causes less reflow than .firstChild
  *	- it's also cheaper than accessing the .childNodes Live NodeList
  */
-// 回收♻️所有的子孙
+// 回收♻️所有的子元素
+// 这里使用了.lastChild而不是使用.firstChild，是因为访问节点的代价更低
 export function removeChildren(node) {
 	node = node.lastChild;
 	while (node) {

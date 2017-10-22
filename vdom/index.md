@@ -23,6 +23,7 @@ export function isSameNodeType(node, vnode, hydrating) {
 *	@param {Element} node
 *	@param {String} nodeName
  */
+ // 判断节点dom类型与虚拟dom的vnodeName类型是否相同
 export function isNamedNode(node, nodeName) {
 	return node.normalizedNodeName===nodeName || node.nodeName.toLowerCase()===nodeName.toLowerCase();
 }

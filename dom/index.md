@@ -21,7 +21,7 @@ export function createNode(nodeName, isSvg) {
 /** Remove a child node from its parent if attached.
  *  @param {Element} node       The node to remove
  */
-// 移除指定的节点
+// 从父节点删除该节点
 export function removeNode(node) {
     let parentNode = node.parentNode;
     if (parentNode) parentNode.removeChild(node);
