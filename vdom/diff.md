@@ -35,36 +35,38 @@ export function flushMounts() {
 
 
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
- *	@param {Element} [dom=null]		A DOM node to mutate into the shape of the `vnode`
- *	@param {VNode} vnode			A VNode (with descendants forming a tree) representing the desired DOM structure
+ *	@param {Element} [dom=null]		指当前的vnode所对应的之前未更新的真实dom。有两种情况，第一就是render的第三个参数，若为空，则是null，这种情况表面是首次渲染。第二种就是vnode的对应的未更新的真实dom，即表示渲染刷新界面
+ *	@param {VNode} vnode			主要是需要渲染的虚拟dom节点
+ *	@param {Element} context		用于全局的属性，跟react类似
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
-	// 初始入口的操作
+	// diffLevel为0时，表示初次进入diff函数。表示递归的深度
 	if (!diffLevel++) {
 		// when first starting the diff, check if we're diffing an SVG or within an SVG
-		// 当刚开始进入diff时，检查dom树的类型是否为SVG
+		// 当刚开始进入diff时，检查dom树的类型是否为SVG或者元素在svg内部
 		isSvgMode = parent!=null && parent.ownerSVGElement!==undefined;
 
-		// hydration is indicated by the existing element to be diffed not having a prop cache
-		// 检查是否缓存了数据
+		// hydration 检查数据被diff的现存元素是否含有属性props的缓存
+		// 属性props的缓存被存在dom节点的_preactattr_属性中(constants.js中)
+		// 只有当前的dom节点并不是由Preact所创建并渲染的才会使得hydrating为true。
 		hydrating = dom!=null && !(ATTR_KEY in dom);
 	}
-	// 返回新的dom
+	// idiff函数就是diff算法的内部实现，idiff会返回虚拟dom对应创建的真实dom节点
 	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
 
 	// append the element if its a new parent
-	// 添加到新的父节点上
+	// 如果父节点之前没有创建这个子节点，则添加到父节点上
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
 
 	// diffLevel being reduced to 0 means we're exiting the diff
-	// 退出diff
+	// 退出diff，这里diffLevel回减到0说明已经要结束diff的调用
 	if (!--diffLevel) {
 		hydrating = false;
 		// invoke queued componentDidMount lifecycle methods
-		// 执行所有hook方法
+		// 执行组件的componentDidMount生命周期，即所有的hook方法
 		if (!componentRoot) flushMounts();
 	}
 
@@ -93,6 +95,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 		// update if it's already a Text node:
 		// 如果dom是文本节点
+		// 这里如果节点值是文本类型，其父节点又是文本类型的节点，则直接更新
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			/* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
 			if (dom.nodeValue!=vnode) {
@@ -110,14 +113,14 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 			}
 		}
 
-		out[ATTR_KEY] = true; // 暂时看应该是标明dom为preact使用的dom？
+		out[ATTR_KEY] = true; // 缓存preactattr属性，表明是经过preact生成的vnode
 
 		return out;
 	}
 
 
 	// If the VNode represents a Component, perform a component diff:
-	// 如果vnodeName 是一个组件，则buildComponentFromVNode
+	// 如果vnodeName 是一个组件，则使用组件的diff
 	let vnodeName = vnode.nodeName;
 	if (typeof vnodeName==='function') {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
@@ -137,11 +140,11 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 		if (dom) {
 			// move children into the replacement node
-			// 将真实的dom，转移到虚拟dom中
+			// 移动dom中的子元素到out中
 			while (dom.firstChild) out.appendChild(dom.firstChild);
 
 			// if the previous Element was mounted into the DOM, replace it inline
-			// 如果父元素存在，则插入到父节点
+			// 如果父元素已经属于某一个DOM节点，则将其替换
 			if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 		
 			// recycle the old element (skips non-Element node types)
@@ -161,7 +164,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 	// Optimization: fast-path for elements containing a single TextNode:
-	// 当只有一个文本节点时则直接替换
+	// 优化：对于元素只包含单一文本节点的快速路径
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
 		if (fc.nodeValue!=vchildren[0]) {
 			fc.nodeValue = vchildren[0];
