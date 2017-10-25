@@ -121,7 +121,7 @@ function setProperty(node, name, value) {
 /** Proxy an event to hooked event handlers
  *  @private
  */
-// 设置事件代理
+// 设置事件代理，这里与react的事件代理不同。
 function eventProxy(e) {
     return this._listeners[e.type](options.event && options.event(e) || e);
 }
