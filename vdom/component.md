@@ -8,14 +8,14 @@ import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom';
 
-/** Set a component's `props` (generally derived from JSX attributes).
+/** 为组件实例设置属性(props).
  *	@param {Object} props
  *	@param {Object} [opts]
  *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
-  // 防止其他的修改
+  // 防止其他的修改，其目的相当于一个锁，保证修改过程的原子性
 	if (component._disable) return;
 	component._disable = true;
 
@@ -26,9 +26,11 @@ export function setComponentProps(component, props, opts, context, mountAll) {
   /**
    * 下面是一些生命周期方法包括props，context的设置
    */
+	// 初次渲染，或者强制渲染
 	if (!component.base || mountAll) {
 		if (component.componentWillMount) component.componentWillMount();
 	}
+	// 不是初次渲染，则进行componentWillReceiveProps
 	else if (component.componentWillReceiveProps) {
 		component.componentWillReceiveProps(props, context);
 	}
@@ -46,6 +48,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
   // 渲染策略，同步渲染与异步渲染分别操作
 	if (opts!==NO_RENDER) {
+		// 如果是同步渲染或者首次渲染，则执行renderComponent
 		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
 			renderComponent(component, SYNC_RENDER, mountAll);
 		}
@@ -53,7 +56,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 			enqueueRender(component);
 		}
 	}
-
+	// 如果存在ref函数，则将组件实例作为参数调用ref函数。preact不支持字符串的ref
 	if (component.__ref) component.__ref(component);
 }
 
