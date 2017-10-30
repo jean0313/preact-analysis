@@ -18,7 +18,7 @@ import { enqueueRender } from './render-queue';
  *  }
  */
 export function Component(props, context) {
-    this._dirty = true;
+    this._dirty = true;  // 表示存在脏数据，即数据与存在的对应渲染不一致
 
     /** @public
      *  @type {object}

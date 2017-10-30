@@ -36,7 +36,7 @@ export function isNamedNode(node, nodeName) {
  * @param {VNode} vnode
  * @returns {Object} props
  */
-// 获取节点属性，包括默认属性
+// 将vnode的attributes和children的属性赋值到props,然后如果组件中存在defaultProps的话，将defaultProps存在的属性并且对应props不存在的属性赋值进入了props中，并将props返回
 export function getNodeProps(vnode) {
 	let props = extend({}, vnode.attributes);
 	props.children = vnode.children;

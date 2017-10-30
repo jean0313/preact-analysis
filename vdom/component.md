@@ -215,36 +215,41 @@ export function renderComponent(component, opts, mountAll, isChild) {
  *	@returns {Element} dom	The created/mutated element
  *	@private
  */
+// 将组件的虚拟dom(VNode)转化成真实dom
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
-	let c = dom && dom._component,
+	let c = dom && dom._component,  // dom是组件对应的真实dom节点（如果未渲染，则为undefined）,dom._component属性是组件实例的缓存
 		originalComponent = c,
 		oldDom = dom,
-		isDirectOwner = c && dom._componentConstructor===vnode.nodeName,
+		isDirectOwner = c && dom._componentConstructor===vnode.nodeName,// 标识原DOM节点对应的组件类型是否与当前虚拟DOM的组件类型相同
 		isOwner = isDirectOwner,
-		props = getNodeProps(vnode);
+		props = getNodeProps(vnode); //获取Vnode节点的属性值
+
+	// 主要找到最开始渲染该DOM的高阶组件(防止某些情况下dom对应的_component属性指代的实例被修改)，然后再判断该高阶组件是否与当前的vnode类型一致。
 	while (c && !isOwner && (c=c._parentComponent)) {
 		isOwner = c.constructor===vnode.nodeName;
 	}
-
+	// 如果存在当前虚拟dom对应的组件实例存在，则直接调用函数setComponentProps
 	if (c && isOwner && (!mountAll || c._component)) {
 		setComponentProps(c, props, ASYNC_RENDER, context, mountAll);
 		dom = c.base;
 	}
 	else {
+		//首先如果之前的dom节点对应存在组件，并且虚拟dom对应的组件类型与其不相同时，则卸载之前的组件
 		if (originalComponent && !isDirectOwner) {
 			unmountComponent(originalComponent);
 			dom = oldDom = null;
 		}
-
+		// 然后创建组件实例
 		c = createComponent(vnode.nodeName, props, context);
 		if (dom && !c.nextBase) {
 			c.nextBase = dom;
 			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:
 			oldDom = null;
 		}
+		// 创建组件实例dom节点
 		setComponentProps(c, props, SYNC_RENDER, context, mountAll);
 		dom = c.base;
-
+		// 如果创建的当前的DOM与之前的DOM元素不相同，则将之前的DOM回收
 		if (oldDom && dom!==oldDom) {
 			oldDom._component = null;
 			recollectNodeTree(oldDom, false);
