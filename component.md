@@ -67,8 +67,9 @@ extend(Component.prototype, {
      *  @private
      */
     forceUpdate(callback) {
+        // 将回调函数放入组件实例中的_renderCallbacks属性并调用函数renderComponent强制刷新当前的组件
         if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
-        renderComponent(this, FORCE_RENDER);
+        renderComponent(this, FORCE_RENDER);  // shouldComponentUpdate 返回true表示强制刷新
     },
 
 

@@ -78,16 +78,17 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		previousProps = component.prevProps || props,
 		previousState = component.prevState || state,
 		previousContext = component.prevContext || context,
-		isUpdate = component.base,
-		nextBase = component.nextBase,
+		isUpdate = component.base,  // 通过组件实例是否对应存在真实DOM节点来判断
+		nextBase = component.nextBase, // 基于此DOM元素进行修改
 		initialBase = isUpdate || nextBase,
-		initialChildComponent = component._component,
-		skip = false,
+		initialChildComponent = component._component, // 表示组件的子组件，即表示是高阶组件的时候
+		skip = false,  // 表示是否需要跳过更新的过程
 		rendered, inst, cbase;
 
 	// if updating
   	// 如果触发了更新
 	if (isUpdate) {
+		// 将props,state,context替换成之前的状态，因为在shouldComponentUpdate,componentWillUpdate中this.props,this.state,this.context都是更新前的状态
 		component.props = previousProps;
 		component.state = previousState;
 		component.context = previousContext;
@@ -103,10 +104,10 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		// 
 		component.props = props;
 		component.state = state;
-		component.context = context;
+		component.context = context; // 将props,state,context替换成最新的状态
 	}
 
-	component.prevProps = component.prevState = component.prevContext = component.nextBase = null;
+	component.prevProps = component.prevState = component.prevContext = component.nextBase = null; 
 	component._dirty = false;
 
 	if (!skip) {
@@ -115,20 +116,23 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 		// context to pass to the child, can be updated via (grand-)parent component
 		// 通过context传递全局状态
+		// 当前组件实例getChildContext返回的context中的属性会覆盖父组件的context中的相同属性。
 		if (component.getChildContext) {
 			context = extend(extend({}, context), component.getChildContext());
 		}
 
-		let childComponent = rendered && rendered.nodeName,
+		let childComponent = rendered && rendered.nodeName, // 组件实例render函数返回的虚拟dom的类型
 			toUnmount, base;
 
 		if (typeof childComponent==='function') {
+			// 表示为高阶函数
 			// set up high order component link
-
+			// 通过getNodeProps获得虚拟dom中子组件的属性
 			let childProps = getNodeProps(rendered);
 			inst = initialChildComponent;
 
 			if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
+				// 同步渲染的方式，递归调用setComponentProps来更新子组件的属性props
 				setComponentProps(inst, childProps, SYNC_RENDER, context, false);
 			}
 			else {
@@ -144,6 +148,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			base = inst.base;
 		}
 		else {
+			// 非组件类型
 			cbase = initialBase;
 
 			// destroy high order component link
@@ -154,17 +159,17 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
-        // 开始diff阶段
+        		// 开始diff阶段,base存储的是本次组件渲染的真实DOM元素
 				base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, true);
 			}
 		}
-
+		// 如果组件前后返回的虚拟dom节点对应渲染后的真实dom节点，或者前后返回的虚拟DOM节点对应的前后组件实例不一致
 		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
-        // 进行替换
+        		// 进行替换
 				baseParent.replaceChild(base, initialBase);
-
+				// 如果没有需要卸载的实例
 				if (!toUnmount) {
 					initialBase._component = null;
 					recollectNodeTree(initialBase, false);
@@ -175,7 +180,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (toUnmount) {
 			unmountComponent(toUnmount);
 		}
-
+		// 将当前组件渲染的dom元素存储在组件实例的base属性中
 		component.base = base;
 		if (base && !isChild) {
 			let componentRef = component,
@@ -202,7 +207,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
-
+	// 如果存在_renderCallbacks属性，这里相当于至于setState的回调函数
 	if (component._renderCallbacks!=null) {
 		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
 	}
@@ -263,7 +268,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 }
 
 
-// 从DOM中移除组件并
+// 从DOM中移除组件
 /** Remove a component from the DOM and recycle it.
  *	@param {Component} component	The Component instance to unmount
  *	@private
@@ -274,7 +279,7 @@ export function unmountComponent(component) {
 	// 
 	let base = component.base;
 
-	component._disable = true;
+	component._disable = true;  // 表示组件禁用
 
 	if (component.componentWillUnmount) component.componentWillUnmount();
 
@@ -286,16 +291,17 @@ export function unmountComponent(component) {
 		unmountComponent(inner);
 	}
 	else if (base) {
+		// 
 		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
 
 		component.nextBase = base;
-
+		// 将base节点的父节点脱离出来
 		removeNode(base);
 		collectComponent(component);
-
+		// 用递归遍历所有的子DOM元素，回收节点
 		removeChildren(base);
 	}
-
+	// 如果最外层节点存在ref函数，则以参数null执行
 	if (component.__ref) component.__ref(null);
 }
 ```
