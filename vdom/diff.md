@@ -35,10 +35,13 @@ export function flushMounts() {
 
 
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
- *	@param {Element} [dom=null]		指当前的vnode所对应的之前未更新的真实dom。有两种情况，第一就是render的第三个参数，若为空，则是null，这种情况表面是首次渲染。第二种就是vnode的对应的未更新的真实dom，即表示渲染刷新界面
- *	@param {VNode} vnode			主要是需要渲染的虚拟dom节点
- *	@param {Element} context		用于全局的属性，跟react类似
- *	@returns {Element} dom			The created/mutated element
+ *	@param {Element} [dom=null]		
+ *	指当前的vnode所对应的之前未更新的真实dom。
+ *  有两种情况，第一就是render的第三个参数，若为空，则是null，空的这种情况表面是首次渲染。
+ *  第二种就是vnode的对应的未更新的真实DOM，即表示渲染刷新界面。
+ *	@param {VNode} vnode 主要是需要渲染的虚拟dom节点
+ *	@param {Element} context 用于全局的属性，跟react类似
+ *	@returns {Element} dom The created/mutated element
  *	@private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
@@ -58,7 +61,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
 
 	// append the element if its a new parent
-	// 如果父节点之前没有创建这个子节点，则添加到父节点上
+	// 如果父节点之前没有创建这个子节点，则添加到父节点上，而不是替换
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
 
 	// diffLevel being reduced to 0 means we're exiting the diff
@@ -95,7 +98,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 		// update if it's already a Text node:
 		// 如果dom是文本节点
-		// 这里如果节点值是文本类型，其父节点又是文本类型的节点，则直接更新
+		// 这里如果节点值是文本类型，并且其父节点存在，则直接更新
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			/* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
 			if (dom.nodeValue!=vnode) {
@@ -113,14 +116,14 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 			}
 		}
 
-		out[ATTR_KEY] = true; // 缓存preactattr属性，表明是经过preact生成的vnode
+		out[ATTR_KEY] = true; // 设置preactattr属性，表明是经过preact生成的vnode
 
 		return out;
 	}
 
 
 	// If the VNode represents a Component, perform a component diff:
-	// 如果vnodeName 是一个组件，则使用组件的diff
+	// 如果vnodeName是一个组件，则使用组件的diff
 	let vnodeName = vnode.nodeName;
 	if (typeof vnodeName==='function') {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
@@ -171,14 +174,14 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
-	// 否则，如果存在chidren,则进行diff
+	// 否则，如果存在chidren，则进行diff
 	else if (vchildren && vchildren.length || fc!=null) {
 		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
 	}
 
 
 	// Apply attributes/props from VNode to the DOM Element:
-	// 将props和atrributes从VNode中应用到DOM元素
+	// 在VNode和DOM之间比较props和atrributes
 	diffAttributes(out, vnode.attributes, props);
 
 
