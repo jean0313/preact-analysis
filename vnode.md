@@ -7,11 +7,4 @@ VNode具体属性参考[h.md](./h.md)。
 ```javascript
 /** Virtual DOM Node */
 export function VNode() {}
-
-// 结构如下所示
-//function VNode(nodeName, attributes, children) {
-//  this.nodeName =  nodeName
- // this.attributes = attributes
- // this.children = children
-//}
 ```
