@@ -27,8 +27,12 @@ util.js
 vnode.js
 ```
 
-## render process
-1. babel解析jsx
+## Reference
+
+在分析中借鉴了如下，再次表示感谢：
+* [从Preact了解一个类React的框架是怎么实现的(一): 元素创建](https://juejin.im/post/59b69b6e5188257e6b6d7bfc)
+* [从Preact了解一个类React的框架是怎么实现的(二): 元素diff](https://juejin.im/post/59c76e515188254f584132af)
+
 ## Contributors
 
 - [g1eny0ung](https://github.com/g1eny0ung)

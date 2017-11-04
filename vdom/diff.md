@@ -16,11 +16,11 @@ export const mounts = [];
 export let diffLevel = 0;
 
 /** Global flag indicating if the diff is currently within an SVG */
-// 判断当前的DOM树是否为SVG
+// 判断当前的DOM树是否在SVG内
 let isSvgMode = false;
 
 /** Global flag indicating if the diff is performing hydration */
-// 判断当前元素是否缓存了之前的虚拟dom
+// if true，表明节点不携带props
 let hydrating = false;
 
 /** Invoke queued componentDidMount lifecycle methods */
@@ -52,9 +52,8 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 		// 当刚开始进入diff时，检查dom树的类型是否为SVG或者元素在svg内部
 		isSvgMode = parent!=null && parent.ownerSVGElement!==undefined;
 
-		// hydration 检查数据被diff的现存元素是否含有属性props的缓存
 		// 属性props的缓存被存在dom节点的_preactattr_属性中(constants.js中)
-		// 只有当前的dom节点并不是由Preact所创建并渲染的才会使得hydrating为true。
+		// 只有当前的dom节点不携带props才会使得hydrating为true。
 		hydrating = dom!=null && !(ATTR_KEY in dom);
 	}
 	// idiff函数就是diff算法的内部实现，idiff会返回虚拟dom对应创建的真实dom节点
@@ -213,7 +212,6 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	// 所有具有key值的child进入keyed，没有key值进入children
-	// 创建一个包含key的子元素和一个不包含有子元素的Map
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
@@ -240,7 +238,6 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// 匹配已经在keyed里面先前的node
 			let key = vchild.key;
 			if (key!=null) {
-				// 通过键值匹配去寻找节点
 				if (keyedLen && keyed[key]!==undefined) {
 					child = keyed[key];
 					// 清除掉keyed里面的匹配到的value
@@ -249,7 +246,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 				}
 			}
 			// attempt to pluck a node of the same type from the existing children
-			// 从现有的孩子节点中匹配相同type的节点
+			// 从children中匹配相同类型的节点
 			else if (!child && min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
@@ -267,7 +264,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			child = idiff(child, vchild, context, mountAll);
 
 			f = originalChildren[i];
-			// child存在并且child不等于之前dom并且child不等于本次循环内的先前原始子节点
+			// 如果child存在并且child不等于之前dom并且child不等于本次循环内的先前原始子节点
 			if (child && child!==dom && child!==f) {
 				if (f==null) {
 					// 子节点为空，直接append
@@ -323,7 +320,7 @@ export function recollectNodeTree(node, unmountOnly) {
 		// (this is part of the React spec, and smart for unsetting references)
 		// 如果存在ref，则设置为null
 		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
-		// 如果unmountOnly为false或者dom中的ATTR_KEY属性不存在(表明不是由preact渲染的),则直接删除dom
+		// 如果unmountOnly为false或者dom中的ATTR_KEY属性不存在(表明不是由preact渲染的)，则直接删除dom
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
 			removeNode(node);
 		}
@@ -338,7 +335,7 @@ export function recollectNodeTree(node, unmountOnly) {
  *	- it's also cheaper than accessing the .childNodes Live NodeList
  */
 // 回收♻️所有的子元素
-// 这里使用了.lastChild而不是使用.firstChild，是因为访问节点的代价更低
+// 这里使用了.lastChild而不是使用.firstChild，是因为访问节点的代价更低，减少DOM计算
 export function removeChildren(node) {
 	node = node.lastChild;
 	while (node) {
