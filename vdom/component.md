@@ -1,3 +1,7 @@
+# <img src="preact-icon.png" width="32" height="32" /> component
+
+源码重要部分。包括组件的各个生命周期的调用策略以及渲染，挂载相关的策略。
+
 ```javascript
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
@@ -7,8 +11,12 @@ import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom';
+```
 
-/** 为组件实例设置属性(props).
+> `setComponentProps`为组件实例设置属性(props)。其中会调用必要的涉及到props的生命周期方法。
+
+```javascript
+/** 
  *	@param {Object} props
  *	@param {Object} [opts]
  *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
@@ -59,11 +67,12 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	// 如果存在ref函数，则将组件实例作为参数调用ref函数。preact不支持字符串的ref
 	if (component.__ref) component.__ref(component);
 }
+```
 
+> 渲染组件，触发必要的生命周期方法。
 
-
+```javascript
 /** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
- *  渲染组建，触发必要的生命周期方法
  *	@param {Component} component
  *	@param {Object} [opts]
  *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
@@ -86,13 +95,13 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		rendered, inst, cbase;
 
 	// if updating
-  	// 如果触发了更新
+  // 如果触发了更新
 	if (isUpdate) {
 		// 将props,state,context替换成之前的状态，因为在shouldComponentUpdate,componentWillUpdate中this.props,this.state,this.context都是更新前的状态
 		component.props = previousProps;
 		component.state = previousState;
 		component.context = previousContext;
-    // 判断是否需要跳过更新
+    	// 判断是否需要跳过更新
 		if (opts!==FORCE_RENDER
 			&& component.shouldComponentUpdate
 			&& component.shouldComponentUpdate(props, state, context) === false) {
@@ -101,12 +110,13 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		else if (component.componentWillUpdate) {
 			component.componentWillUpdate(props, state, context);
 		}
-		// 
+
 		component.props = props;
 		component.state = state;
 		component.context = context; // 将props,state,context替换成最新的状态
 	}
 
+	// 此处为生命周期触发后的重置
 	component.prevProps = component.prevState = component.prevContext = component.nextBase = null; 
 	component._dirty = false;
 
@@ -159,7 +169,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
-        		// 开始diff阶段,base存储的是本次组件渲染的真实DOM元素
+        // 开始diff阶段,base存储的是本次组件渲染的真实DOM元素
 				base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, true);
 			}
 		}
@@ -167,7 +177,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
-        		// 进行替换
+				// 进行替换
 				baseParent.replaceChild(base, initialBase);
 				// 如果没有需要卸载的实例
 				if (!toUnmount) {
@@ -207,30 +217,31 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
-	// 如果存在_renderCallbacks属性，这里相当于至于setState的回调函数
+	// 如果存在_renderCallbacks属性，这里相当于置于setState的回调函数
 	if (component._renderCallbacks!=null) {
 		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
 	}
 
 	if (!diffLevel && !isChild) flushMounts();
 }
+```
 
+> 将组件的虚拟dom(VNode)转化成真实dom。
 
-
+```javascript
 /** Apply the Component referenced by a VNode to the DOM.
  *	@param {Element} dom	The DOM node to mutate
  *	@param {VNode} vnode	A Component-referencing VNode
  *	@returns {Element} dom	The created/mutated element
  *	@private
  */
-// 将组件的虚拟dom(VNode)转化成真实dom
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,  // dom是组件对应的真实dom节点（如果未渲染，则为undefined）,dom._component属性是组件实例的缓存
 		originalComponent = c,
 		oldDom = dom,
 		isDirectOwner = c && dom._componentConstructor===vnode.nodeName,// 标识原DOM节点对应的组件类型是否与当前虚拟DOM的组件类型相同
 		isOwner = isDirectOwner,
-		props = getNodeProps(vnode); //获取Vnode节点的属性值
+		props = getNodeProps(vnode); // 获取Vnode节点的属性值
 
 	// 主要找到最开始渲染该DOM的高阶组件(防止某些情况下dom对应的_component属性指代的实例被修改)，然后再判断该高阶组件是否与当前的vnode类型一致。
 	while (c && !isOwner && (c=c._parentComponent)) {
@@ -242,7 +253,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 		dom = c.base;
 	}
 	else {
-		//首先如果之前的dom节点对应存在组件，并且虚拟dom对应的组件类型与其不相同时，则卸载之前的组件
+		// 首先如果之前的dom节点对应存在组件，并且虚拟dom对应的组件类型与其不相同时，则卸载之前的组件
 		if (originalComponent && !isDirectOwner) {
 			unmountComponent(originalComponent);
 			dom = oldDom = null;
@@ -266,9 +277,11 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 
 	return dom;
 }
+```
 
+> 取消一个组件的挂载，从DOM中移除组件。
 
-// 从DOM中移除组件
+```javascript
 /** Remove a component from the DOM and recycle it.
  *	@param {Component} component	The Component instance to unmount
  *	@private
@@ -276,7 +289,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 export function unmountComponent(component) {
 	// 执行beforeUnmount的钩子函数
 	if (options.beforeUnmount) options.beforeUnmount(component);
-	// 
+
 	let base = component.base;
 
 	component._disable = true;  // 表示组件禁用
@@ -291,7 +304,7 @@ export function unmountComponent(component) {
 		unmountComponent(inner);
 	}
 	else if (base) {
-		// 
+
 		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
 
 		component.nextBase = base;

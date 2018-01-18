@@ -1,4 +1,6 @@
-**render-queue**处理render的队列
+# <img src="preact-icon.png" width="32" height="32" /> render-queue
+
+**render-queue**处理需要render的组件的队列。
 
 ```javascript
 import options from './options';
@@ -9,11 +11,11 @@ import { renderComponent } from './vdom/component';
 
 let items = [];
 
-// 主要用于延迟渲染当前组件
+// 异步渲染组件队列
 export function enqueueRender(component) {
     // 若component的_dirty为false，则将其赋值为true
     if (!component._dirty && (component._dirty = true) && items.push(component)==1) {
-        // 当更新队列第一次被items时，则延迟异步执行函数rerender
+        // 如果定义了debounceRendering（防抖render？），或者使用defer来异步重新渲染
         (options.debounceRendering || defer)(rerender);
     }
 }

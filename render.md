@@ -1,4 +1,14 @@
+# <img src="preact-icon.png" width="32" height="32" /> render
+
 **render**用来渲染JSX到指定element中，其实就是渲染成一个真实的dom。
+
+调用[diff](vdom/diff)方法。
+
+这里vnode是虚拟DOM， parent是容器的DOM。
+
+merge可选，是另外一个已经存在的dom树，如果指定merge则会将虚拟DOM生成的DOM树替换到merge上。如果不指定的话，将会把生成的DOM树依次添加到parent里面。
+
+React的第三个参数是一个回调函数，在渲染时触发。
 
 ```javascript
 import { diff } from './vdom/diff';
@@ -19,12 +29,6 @@ import { diff } from './vdom/diff';
  *	const Thing = ({ name }) => <span>{ name }</span>;
  *	render(<Thing name="one" />, document.querySelector('#foo'));
  */
- /**
-  * 调用diff方法，这里vnode是虚拟DOM， parent是容器的DOM。
-	* merge可选，是另外一个已经存在的dom树，如果指定merge则会将虚拟DOM生成的DOM树替换到merge上。
-	* 如果不指定的话，将会把生成的DOM树依次add到parent里面。
-	* 而react第三个参数是一个回调函数，在渲染时触发。
-  */ 
 export function render(vnode, parent, merge) {
 	return diff(merge, vnode, {}, false, parent, false);
 }

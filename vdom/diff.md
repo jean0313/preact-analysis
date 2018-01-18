@@ -1,3 +1,7 @@
+# <img src="preact-icon.png" width="32" height="32" /> diff
+
+源码重要部分。主要为VNode的比较操作。
+
 ```javascript
 import { ATTR_KEY } from '../constants';
 import { isSameNodeType, isNamedNode } from './index';
@@ -37,8 +41,8 @@ export function flushMounts() {
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
  *	@param {Element} [dom=null]		
  *	指当前的vnode所对应的之前未更新的真实dom。
- *  有两种情况，第一就是render的第三个参数，若为空，则是null，空的这种情况表面是首次渲染。
- *  第二种就是vnode的对应的未更新的真实DOM，即表示渲染刷新界面。
+ *	有两种情况，第一就是render的第三个参数，若为空，则是null，空的这种情况表面是首次渲染。
+ *	第二种就是vnode的对应的未更新的真实DOM，即表示渲染刷新界面。
  *	@param {VNode} vnode 主要是需要渲染的虚拟dom节点
  *	@param {Element} context 用于全局的属性，跟react类似
  *	@returns {Element} dom The created/mutated element
@@ -302,12 +306,12 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
  *	@param {Node} node						DOM node to start unmount/removal from
  *	@param {Boolean} [unmountOnly=false]	If `true`, only triggers unmount lifecycle, skips removal
  */
- /**
-  * 重新回收♻️整个节点树
-  * unmountOnly表明只触发unmount生命周期，不进行节点的移除
-  * 递归地回收节点及其后代节点
-  * unmountOnly如果为true,仅仅触发卸载的生命周期，跳过删除	
-*/
+/**
+ * 重新回收♻️整个节点树
+ * unmountOnly表明只触发unmount生命周期，不进行节点的移除
+ * 递归地回收节点及其后代节点
+ * unmountOnly如果为true,仅仅触发卸载的生命周期，跳过删除	
+ */
 export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;
 	if (component) {

@@ -1,4 +1,6 @@
-**options**对象用来保存全局的选项
+# <img src="preact-icon.png" width="32" height="32" /> options
+
+**options**对象用来保存全局的选项。
 
 ```javascript
 /** Global options

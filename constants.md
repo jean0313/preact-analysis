@@ -1,12 +1,14 @@
-指定不同的渲染模式
+# <img src="preact-icon.png" width="32" height="32" /> constants
+
+一些常量的定义。
 
 ```javascript
 // render modes
 
 export const NO_RENDER = 0;     // 表示没有渲染
 export const SYNC_RENDER = 1;   // 同步渲染
-export const FORCE_RENDER = 2;  // 强制更新
-export const ASYNC_RENDER = 3;  // 组件异步更新
+export const FORCE_RENDER = 2;  // 强制渲染
+export const ASYNC_RENDER = 3;  // 组件异步渲染
 
 
 export const ATTR_KEY = '__preactattr_';  // 要添加的属性前缀

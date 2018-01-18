@@ -1,10 +1,10 @@
-# preact 源码解析
+# <img src="preact-icon.png" width="32" height="32" /> Preact 源码解析
 
-此时[preact](https://github.com/developit/preact)的版本为8.2.1。
+此时[Preact](https://github.com/developit/preact)的版本为8.2.7。
 
-如何使用preact请参考[官网指导](https://preactjs.com/guide/getting-started)。
+如何使用Preact请参考[官网指导](https://preactjs.com/guide/getting-started)。
 
-如有发现存在分析错误或不严谨之处，请前往**issue**提出。
+如有发现存在分析错误或不严谨之处，请前往[issue](https://github.com/sinkmind/preact-analysis/issues)提出，感谢大家。
 
 ## Source Code Tree
 
@@ -18,6 +18,7 @@ vdom/
   - index.js
 clone-element.js
 component.js
+constants.js
 h.js
 options.js
 preact.js
@@ -29,7 +30,7 @@ vnode.js
 
 ## Reference
 
-在分析中借鉴了如下，再次表示感谢：
+在分析中借鉴了如下，在此表示感谢：
 * [从Preact了解一个类React的框架是怎么实现的(一): 元素创建](https://juejin.im/post/59b69b6e5188257e6b6d7bfc)
 * [从Preact了解一个类React的框架是怎么实现的(二): 元素diff](https://juejin.im/post/59c76e515188254f584132af)
 
