@@ -1,10 +1,12 @@
 # <img src="preact-icon.png" width="32" height="32" /> Preact 源码解析
 
+[https://sinkmind.github.io/preact-analysis/](https://sinkmind.github.io/preact-analysis/)
+
 此时[Preact](https://github.com/developit/preact)的版本为8.2.7。
 
 如何使用Preact请参考[官网指导](https://preactjs.com/guide/getting-started)。
 
-如有发现存在分析错误或不严谨之处，请前往[issue](https://github.com/sinkmind/preact-analysis/issues)提出，感谢大家。
+如有发现存在分析错误或不严谨之处或者其他补充，请前往[issue](https://github.com/sinkmind/preact-analysis/issues)提出，感谢大家。
 
 ## Source Code Tree
 
