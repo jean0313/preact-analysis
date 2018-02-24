@@ -56,7 +56,7 @@ extend(Component.prototype, {
      */
 ```
 
-> setState的表示, 最后的重新渲染异步的
+> setState的表示, 最后的重新渲染是异步的
 
 ```javascript
     /** Update component state by copying properties from `state` to `this.state`.
