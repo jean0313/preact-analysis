@@ -1,7 +1,7 @@
 # <img src="preact-icon.png" width="32" height="32" /> index
 
 ```javascript
-import { extend } from '../util';
+import { extend } from '../util'
 ```
 
 > 检测节点类型是否等同。
@@ -16,17 +16,17 @@ import { extend } from '../util';
  * @private
  */
 export function isSameNodeType(node, vnode, hydrating) {
-	if (typeof vnode==='string' || typeof vnode==='number') {
-		return node.splitText!==undefined;
-	}
-	if (typeof vnode.nodeName==='string') {
-		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
-	}
-	return hydrating || node._componentConstructor===vnode.nodeName;
+  if (typeof vnode === 'string' || typeof vnode === 'number') {
+    return node.splitText !== undefined
+  }
+  if (typeof vnode.nodeName === 'string') {
+    return !node._componentConstructor && isNamedNode(node, vnode.nodeName)
+  }
+  return hydrating || node._componentConstructor === vnode.nodeName
 }
 ```
 
-> 判断节点dom的名称是否与给定的nodeName相同。
+> 判断节点 dom 的名称是否与给定的 nodeName 相同。
 
 ```javascript
 /**
@@ -36,11 +36,14 @@ export function isSameNodeType(node, vnode, hydrating) {
  * @param {String} nodeName	Unnormalized name to compare against.
  */
 export function isNamedNode(node, nodeName) {
-	return node.normalizedNodeName===nodeName || node.nodeName.toLowerCase()===nodeName.toLowerCase();
+  return (
+    node.normalizedNodeName === nodeName ||
+    node.nodeName.toLowerCase() === nodeName.toLowerCase()
+  )
 }
 ```
 
-> 提取出vnode的props。
+> 提取出 vnode 的 props。
 
 ```javascript
 /**
@@ -52,18 +55,18 @@ export function isNamedNode(node, nodeName) {
  * @returns {Object} props
  */
 export function getNodeProps(vnode) {
-	let props = extend({}, vnode.attributes);
-	props.children = vnode.children;
+  let props = extend({}, vnode.attributes)
+  props.children = vnode.children
 
-	let defaultProps = vnode.nodeName.defaultProps;
-	if (defaultProps!==undefined) {
-		for (let i in defaultProps) {
-			if (props[i]===undefined) {
-				props[i] = defaultProps[i];
-			}
-		}
-	}
+  let defaultProps = vnode.nodeName.defaultProps
+  if (defaultProps !== undefined) {
+    for (let i in defaultProps) {
+      if (props[i] === undefined) {
+        props[i] = defaultProps[i]
+      }
+    }
+  }
 
-	return props;
+  return props
 }
 ```

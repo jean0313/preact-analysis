@@ -1,12 +1,12 @@
 # <img src="preact-icon.png" width="32" height="32" /> component
 
-基本组件class。
+基本组件 class。
 
 ```javascript
-import { FORCE_RENDER } from './constants';
-import { extend } from './util';
-import { renderComponent } from './vdom/component';
-import { enqueueRender } from './render-queue';
+import { FORCE_RENDER } from './constants'
+import { extend } from './util'
+import { renderComponent } from './vdom/component'
+import { enqueueRender } from './render-queue'
 
 /** Base Component class.
  *  Provides `setState()` and `forceUpdate()`, which trigger rendering.
@@ -20,22 +20,22 @@ import { enqueueRender } from './render-queue';
  *  }
  */
 export function Component(props, context) {
-    this._dirty = true;  // 表示存在脏数据，即数据与现有的对应不一致
+  this._dirty = true // 表示存在脏数据，即数据与现有的对应不一致
 
-    /** @public
-     *  @type {object}
-     */
-    this.context = context;
+  /** @public
+   *  @type {object}
+   */
+  this.context = context
 
-    /** @public
-     *  @type {object}
-     */
-    this.props = props;
+  /** @public
+   *  @type {object}
+   */
+  this.props = props
 
-    /** @public
-     *  @type {object}
-     */
-    this.state = this.state || {};
+  /** @public
+   *  @type {object}
+   */
+  this.state = this.state || {}
 }
 ```
 
@@ -43,20 +43,20 @@ export function Component(props, context) {
 extend(Component.prototype, {
 ```
 
-> shouldComponentUpdate的表示
+> shouldComponentUpdate 的表示
 
 ```javascript
-    /** Returns a `boolean` indicating if the component should re-render when receiving the given `props` and `state`.
-     *  @param {object} nextProps
-     *  @param {object} nextState
-     *  @param {object} nextContext
-     *  @returns {Boolean} should the component re-render
-     *  @name shouldComponentUpdate
-     *  @function
-     */
+/** Returns a `boolean` indicating if the component should re-render when receiving the given `props` and `state`.
+ *  @param {object} nextProps
+ *  @param {object} nextState
+ *  @param {object} nextContext
+ *  @returns {Boolean} should the component re-render
+ *  @name shouldComponentUpdate
+ *  @function
+ */
 ```
 
-> setState的表示, 最后的重新渲染是异步的
+> setState 的表示, 最后的重新渲染是异步的
 
 ```javascript
     /** Update component state by copying properties from `state` to `this.state`.
@@ -87,7 +87,7 @@ extend(Component.prototype, {
     },
 ```
 
-> render的表示
+> render 的表示
 
 ```
     /** Accepts `props` and `state`, and returns a new Virtual DOM tree to build.

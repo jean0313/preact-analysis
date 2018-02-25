@@ -3,7 +3,7 @@
 **util**提供一些公用方法。
 
 ```javascript
-/** 
+/**
  *  Copy all properties from `props` onto `obj`.
  *  把props的属性添加到obj上,浅拷贝,类似于ES6的Object.assign
  *
@@ -13,8 +13,8 @@
  *  @private
  */
 export function extend(obj, props) {
-	for (let i in props) obj[i] = props[i];
-	return obj;
+  for (let i in props) obj[i] = props[i]
+  return obj
 }
 
 /**
@@ -25,5 +25,8 @@ export function extend(obj, props) {
  *
  * @param {Function} callback
  */
-export const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+export const defer =
+  typeof Promise == 'function'
+    ? Promise.resolve().then.bind(Promise.resolve())
+    : setTimeout
 ```
